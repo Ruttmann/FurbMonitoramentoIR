@@ -1,8 +1,8 @@
 #include <IRremote.h> 
 
 #define PIN_LED 7 //Pino do LED de feedback ao usuário
-#define PIN_TX 51 //Pino emissor
-#define PIN_RX 50 //Pino receptor
+#define PIN_TX 45 //Pino emissor
+#define PIN_RX 44 //Pino receptor
 #define maxLen 500 //Número máximo de pulsos a receber
 #define FREQ 38 //Frequência da portadora em KHz
 
