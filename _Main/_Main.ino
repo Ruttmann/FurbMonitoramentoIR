@@ -15,6 +15,10 @@
 #define maxLen 500 //Tamanho do trem de pulsos
 #define FREQ 38 //Frequência da portadora em KHz
 
+//Definições de monitoramento
+#include <SimpleTimer.h>
+#define PIN_PIR 40 //Pino do sensor de presença
+
 //Variáveis de comunicação
 SocketIOClient client; //Cliente Websocket
 byte mac[] = { 0xAA, 0x00, 0xBE, 0xEF, 0xFE, 0xEE };
@@ -31,6 +35,9 @@ volatile unsigned int x = 0; //Flag/contador do irBuffer - volatile pois é mani
 unsigned int sinalIR1[maxLen]; //Armazena os tempos dos pulsos do sinal
 unsigned int sinalIR2[maxLen]; //Armazena os tempos dos pulsos do sinal
 unsigned int tamanhoSinal; //Armazena a quantidade de pulsos do sinal
+
+//Variáveis de monitoramento
+
 
 //Botões
 unsigned int btnCad1; //Cadastrar sinal 1.
