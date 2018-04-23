@@ -1,3 +1,5 @@
+//Esquema de ligação do LDR: https://portal.vidadesilicio.com.br/sensor-de-luz-com-ldr/
+
 int ledPin1 = 49;
 int ledPin2 = 44;
 int ldrPin = 0; //Pino analógico A0
