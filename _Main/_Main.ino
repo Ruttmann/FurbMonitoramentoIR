@@ -31,10 +31,11 @@
 /*
  * Variáveis de comunicação
  */
-SocketIOClient client; //Cliente Websocket
+SocketIOClient client;
 byte mac[] = { 0xAA, 0x00, 0xBE, 0xEF, 0xFE, 0xEE };
 char hostname[] = "intense-eyrie-51108.herokuapp.com";
 int port = 3484; //Não obrigatório quando se conecta com URL
+char nameSpace[] = "arduino";
 extern String RID;
 extern String Rname;
 extern String Rcontent;
@@ -43,8 +44,8 @@ extern String Rcontent;
  * Variáveis de IR
  */
 IRsend irsend; //Emissor de IR
-volatile  unsigned int irBuffer[MAX_LENGTH]; //Armazena os pulsos temporariamente - volatile pois é manipulado pelo ISR
-volatile unsigned int x = 0; //Flag/contador do irBuffer - volatile pois é manipulado pelo ISR
+volatile unsigned int irBuffer[MAX_LENGTH]; //Armazena os pulsos temporariamente
+volatile unsigned int x = 0; //Flag/contador do irBuffer
 unsigned int sinalIR1[MAX_LENGTH]; //Armazena os tempos dos pulsos do sinal
 unsigned int sinalIR2[MAX_LENGTH]; //Armazena os tempos dos pulsos do sinal
 unsigned int tamanhoSinal; //Armazena a quantidade de pulsos do sinal
@@ -79,7 +80,7 @@ void setup() {
 void loop() {
     //Inicia monitoramento...
     if (!haMovimentos()) {
-      //Desliga dispositivos 
+      //Desliga dispositivos
     }
 }
 
