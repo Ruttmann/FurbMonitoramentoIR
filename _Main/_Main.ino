@@ -1,50 +1,73 @@
-//Definições de comunicação
+/*
+ * Definições de comunicação
+ */
 #define W5100
 #include <SocketIOClient.h>
 #include <Ethernet.h>
 #include <SPI.h>
 
-//Definições de IR
+/*
+ * Definições de IR
+ */
 #include <IRremote.h>
-#define PIN_LED 7 //Pino do LED de feedback ao usuário
-#define PIN_TX 45 //Emissor IR
-#define PIN_RX 44 //Receptor IR
-#define PIN_CAD1 46 //Pino cadastrar sinal 1
-#define PIN_CAD2 47 //Pino cadastrar sinal 2
-#define PIN_INICIAR 48 //Pino iniciar operação
-#define maxLen 500 //Tamanho do trem de pulsos
+#define PIN_LED 7 //Pino digital do LED de feedback ao usuário
+#define PIN_TX 45 //Pino digital emissor IR
+#define PIN_RX 44 //Pino digital receptor IR
+#define PIN_CAD1 46 //Pino digital cadastrar sinal 1
+#define PIN_CAD2 47 //Pino digital cadastrar sinal 2
+#define PIN_INICIAR 48 //Pino digital iniciar operação
+#define MAX_LENGTH 500 //Tamanho do trem de pulsos
 #define FREQ 38 //Frequência da portadora em KHz
 
-//Definições de monitoramento
+/*
+ * Definições de monitoramento 
+ */
 #include <SimpleTimer.h>
-#define PIN_PIR 40 //Pino do sensor de presença
+#define PIN_PIR 39 //Pino digital do sensor de presença
+#define PIN_LDR_AR 0 //Pino analógico A0 do sensor LDR ar-condicionado
+#define PIN_LDR_PR 1 //Pino analógico A1 do sensor LDR projetor
+#define PIN_LED_INIT 38 //Pino digital do led de status de inicialização do sensor PIR
 
-//Variáveis de comunicação
+/*
+ * Variáveis de comunicação
+ */
 SocketIOClient client; //Cliente Websocket
 byte mac[] = { 0xAA, 0x00, 0xBE, 0xEF, 0xFE, 0xEE };
 char hostname[] = "intense-eyrie-51108.herokuapp.com";
-int port = 3484; //Não obrigatório quando se conecta com URL.
+int port = 3484; //Não obrigatório quando se conecta com URL
 extern String RID;
 extern String Rname;
 extern String Rcontent;
 
-//Variáveis de IR
+/*
+ * Variáveis de IR
+ */
 IRsend irsend; //Emissor de IR
-volatile  unsigned int irBuffer[maxLen]; //Armazena os pulsos temporariamente - volatile pois é manipulado pelo ISR
+volatile  unsigned int irBuffer[MAX_LENGTH]; //Armazena os pulsos temporariamente - volatile pois é manipulado pelo ISR
 volatile unsigned int x = 0; //Flag/contador do irBuffer - volatile pois é manipulado pelo ISR
-unsigned int sinalIR1[maxLen]; //Armazena os tempos dos pulsos do sinal
-unsigned int sinalIR2[maxLen]; //Armazena os tempos dos pulsos do sinal
+unsigned int sinalIR1[MAX_LENGTH]; //Armazena os tempos dos pulsos do sinal
+unsigned int sinalIR2[MAX_LENGTH]; //Armazena os tempos dos pulsos do sinal
 unsigned int tamanhoSinal; //Armazena a quantidade de pulsos do sinal
 
-//Variáveis de monitoramento
+/*
+ * Variáveis de monitoramento
+ */
+unsigned int ldrAr; //Valor do sensor LDR do ar-condicionado
+unsigned int ldrPr; //Valor do sensor LDR do projetor
+unsigned int statusPIR; //Status do sensor PIR
+bool contadorIniciado = false;
+unsigned long tempoContador = 0;
 
+/*
+ * Botões
+ */
+unsigned int btnCad1; //Cadastrar sinal 1
+unsigned int btnCad2; //Cadastrar sinal 2
+unsigned int btnIniciar; //Iniciar operação
 
-//Botões
-unsigned int btnCad1; //Cadastrar sinal 1.
-unsigned int btnCad2; //Cadastrar sinal 2.
-unsigned int btnIniciar; //Iniciar operação.
-
-//Flags
+/*
+ * Flags gerais
+ */
 bool haNovosSinais = false;
 bool rodouBoot = false;
 
@@ -55,15 +78,23 @@ void setup() {
 
 void loop() {
     //Inicia monitoramento...
+    if (!haMovimentos()) {
+      //Desliga dispositivos 
+    }
 }
 
-//Rotinas de boot do Arduino
+/*
+ * Rotinas de boot do Arduino
+ */
 void boot() {
   pinMode(PIN_CAD1, INPUT);
   pinMode(PIN_CAD2, INPUT);
   pinMode(PIN_INICIAR, INPUT);
   pinMode(PIN_TX, INPUT);
   pinMode(PIN_RX, INPUT);
+  pinMode(PIN_PIR, INPUT);
+  pinMode(PIN_LED, OUTPUT);
+  pinMode(PIN_LED_INIT, OUTPUT);
   bool bootConcluido = false;
 
   while (!bootConcluido) {
@@ -71,17 +102,18 @@ void boot() {
     btnCad2 = digitalRead(PIN_CAD2);
     btnIniciar = digitalRead(PIN_INICIAR);
 
-    if (btnCad1) { //Cadastrar sinal 1.
+    if (btnCad1) { //Cadastrar sinal 1
       setupIR();
       loopIR(true);
       haNovosSinais = true;
-    } else if (btnCad2) { //Cadastrar sinal 2.
+    } else if (btnCad2) { //Cadastrar sinal 2
       setupIR();
       loopIR(false);
       haNovosSinais = true;
     }
 
-    if (btnIniciar) { //Finalização do boot.
+    if (btnIniciar) { //Finalizar boot e iniciar monitoramento
+      setupMonitoramento();
       setupComunicacao();
       enviarIdentificacao();
       if (haNovosSinais) {

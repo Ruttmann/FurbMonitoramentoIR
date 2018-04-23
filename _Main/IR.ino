@@ -1,4 +1,6 @@
-//FUNÇÕES DE RECEPÇÃO E EMISSÃO DE IR
+/*
+ * Funções para recepção e emissão de IR
+ */
 
 void setupIR() {
   attachInterrupt(0, interruptHandlerRX, CHANGE); //Inicia ISR para recepção de IR
@@ -8,10 +10,10 @@ void setupIR() {
 void loopIR(bool sinal1) {
     if (x) { //Se algum sinal foi detectado
       Serial.println();
-      Serial.print(F("Raw: (")); //Reporta a quantidade de pulsos do sinal
+      Serial.print(F("Raw: (")); //Reporta os pulsos do sinal
       Serial.print((x - 1));
       Serial.println(F(") "));
-      detachInterrupt(0);//Desliga a interrupção e captura de sinais
+      detachInterrupt(0); //Desliga a interrupção de captura de sinais
       for (int i = 1; i < x; i++) { //Persiste os pulsos no array de sinal
         if (sinal1)
           sinalIR1[i-1] = irBuffer[i] - irBuffer[i - 1];
@@ -30,13 +32,17 @@ void loopIR(bool sinal1) {
     }
 }
 
-//Interrupção de recepção de IR
+/*
+ * Interrupção de recepção de IR
+ */
 void interruptHandlerRX() {
-  if (x > maxLen) return; //Ignora se irBuffer já estiver cheio.
+  if (x > MAX_LENGTH) return; //Ignora se irBuffer já estiver cheio.
   irBuffer[x++] = micros(); //Grava continuamente o time-stamp das transições de sinais.
 }
 
-//Envio do sinal IR RAW
+/*
+ * Envio do sinal IR RAW
+ */
 void sendRawSignal(bool sinal1) {
   irsend.enableIROut(FREQ); //Habilita emissor
   for(unsigned int i = 0; i < tamanhoSinal; i++) {

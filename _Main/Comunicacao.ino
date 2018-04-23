@@ -1,4 +1,6 @@
-//FUNÇÕES DE COMUNICAÇÃO COM SERVIDOR REMOTO
+/*
+ * Métodos para comunicação com o servidor remoto
+ */
 
 void setupComunicacao() {
   ficarOnline();
