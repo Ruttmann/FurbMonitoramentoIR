@@ -4,6 +4,7 @@
 
 void setupIR() {
   attachInterrupt(0, interruptHandlerRX, CHANGE); //Inicia ISR para recepção de IR
+  Serial.println(F("Pressione o botão do controle - apenas uma vez"));
   delay(5000); //Pausa de 5 segundos para receber o sinal completo
 }
 
@@ -27,7 +28,11 @@ void loopIR(bool sinal1) {
           Serial.println(sinalIR2[i-1]);
       }
       Serial.println();
-      tamanhoSinal = x - 1;
+      if (sinal1) {
+        tamanhoSinal1 = x - 1;
+      } else {
+        tamanhoSinal2 = x - 1;
+      }
       x = 0;
     }
 }
@@ -44,8 +49,14 @@ void interruptHandlerRX() {
  * Envio do sinal IR RAW
  */
 void sendRawSignal(bool sinal1) {
+  unsigned int tamSinal;
+  if (sinal1) {
+    tamSinal = tamanhoSinal1;
+  } else {
+    tamSinal = tamanhoSinal2;
+  }
   irsend.enableIROut(FREQ); //Habilita emissor
-  for(unsigned int i = 0; i < tamanhoSinal; i++) {
+  for(unsigned int i = 0; i < tamSinal; i++) {
     if (i & 1) {
       if (sinal1)
         irsend.space(sinalIR1[i]);

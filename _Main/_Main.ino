@@ -3,6 +3,7 @@
  */
 #define W5100
 #include <SocketIOClient.h>
+#include <ArduinoJson.h>
 #include <Ethernet.h>
 #include <SPI.h>
 
@@ -33,12 +34,14 @@
  */
 SocketIOClient client;
 byte mac[] = { 0xAA, 0x00, 0xBE, 0xEF, 0xFE, 0xEE };
-char hostname[] = "intense-eyrie-51108.herokuapp.com";
-int port = 3484; //Não obrigatório quando se conecta com URL
+char hostname[] = "192.168.0.15";
+int port = 3000; //Não obrigatório quando se conecta com URL
 char nameSpace[] = "arduino";
 extern String RID;
 extern String Rname;
 extern String Rcontent;
+const char identificador[] = "S403";
+const size_t bufferSize = JSON_ARRAY_SIZE(2) + JSON_ARRAY_SIZE(2) + JSON_OBJECT_SIZE(2);
 
 /*
  * Variáveis de IR
@@ -46,9 +49,10 @@ extern String Rcontent;
 IRsend irsend; //Emissor de IR
 volatile unsigned int irBuffer[MAX_LENGTH]; //Armazena os pulsos temporariamente
 volatile unsigned int x = 0; //Flag/contador do irBuffer
-unsigned int sinalIR1[MAX_LENGTH]; //Armazena os tempos dos pulsos do sinal
-unsigned int sinalIR2[MAX_LENGTH]; //Armazena os tempos dos pulsos do sinal
-unsigned int tamanhoSinal; //Armazena a quantidade de pulsos do sinal
+unsigned int sinalIR1[MAX_LENGTH]; //Armazena os tempos dos pulsos do sinal 1
+unsigned int tamanhoSinal1; //Armazena a quantidade de pulsos do sinal 1
+unsigned int sinalIR2[MAX_LENGTH]; //Armazena os tempos dos pulsos do sinal 2
+unsigned int tamanhoSinal2; //Armazena a quantidade de pulsos do sinal 2
 
 /*
  * Variáveis de monitoramento
@@ -69,7 +73,8 @@ unsigned int btnIniciar; //Iniciar operação
 /*
  * Flags gerais
  */
-bool haNovosSinais = false;
+bool novoSinal1 = false;
+bool novoSinal2 = false;
 bool rodouBoot = false;
 
 void setup() {
@@ -104,22 +109,23 @@ void boot() {
     btnIniciar = digitalRead(PIN_INICIAR);
 
     if (btnCad1) { //Cadastrar sinal 1
+      Serial.println(F("Cadastrar sinal 1"));
       setupIR();
       loopIR(true);
-      haNovosSinais = true;
+      novoSinal1 = true;
     } else if (btnCad2) { //Cadastrar sinal 2
+      Serial.println(F("Cadastrar sinal 2"));
       setupIR();
       loopIR(false);
-      haNovosSinais = true;
+      novoSinal2 = true;
     }
 
     if (btnIniciar) { //Finalizar boot e iniciar monitoramento
-      setupMonitoramento();
-      setupComunicacao();
-      enviarIdentificacao();
-      if (haNovosSinais) {
-        gerarJSON();
-        enviarJSON();
+      //setupMonitoramento();
+      //setupComunicacao();
+      if (novoSinal1 || novoSinal2) {
+        geraJsonSinais();
+        //enviarNovosSinais();
       }
       bootConcluido = true;
     }

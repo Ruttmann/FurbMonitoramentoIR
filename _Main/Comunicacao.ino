@@ -12,25 +12,75 @@ void ficarOnline() {
     Serial.println(F("ERRO: Conexão Internet!"));
   } else {
     Serial.println(F("Online..."));
+    Serial.println(Ethernet.localIP());
   }
 }
 
 void conectarServidorWS() {
-  if (!client.connect(hostname, nameSpace)) {
+  if (!client.connect(hostname, port, nameSpace)) {
     Serial.println(F("ERRO: Conexão Servidor!"));
   } else {
     Serial.println(F("Conectado ao servidor..."));
   }
-  enviarMensagem("connection", "message", "Conectado!!!"); //
+  enviarMensagem("connection", "id", identificador);
   delay(1000);
 }
 
-void enviarIdentificacao() {
+void enviarNovosSinais() {
+  if (novoSinal1) {
+    
+  }
+
+  if (novoSinal2) {
+    
+  }
   
 }
 
-void gerarJSON() {
+void geraJsonSinais() {
+  const unsigned int quant = 240;
+//  const size_t bufferSize = JSON_ARRAY_SIZE(tamanhoSinal1) + JSON_ARRAY_SIZE(tamanhoSinal2) + JSON_OBJECT_SIZE(2);
+  const size_t bufferSize = JSON_ARRAY_SIZE(quant) + JSON_ARRAY_SIZE(quant) + JSON_OBJECT_SIZE(2);
+  DynamicJsonBuffer jsonBuffer(bufferSize);
+  JsonObject& root = jsonBuffer.createObject();
+  JsonArray& sinal1 = root.createNestedArray("sinal1");
+  JsonArray& sinal2 = root.createNestedArray("sinal2");
+
+  if (novoSinal1) {
+//    for (int i=0; i<sizeof(sinalIR1)/sizeof(*sinalIR1); i++) {
+//      sinal1.add(sinalIR1[i]);
+//    }
+//    for (int i=0; i<tamanhoSinal1; i++) {
+//      sinal1.add(sinalIR1[i]);
+//    }
+    for (int i=0; i<quant; i++) {
+      sinal1.add(sinalIR1[i]);
+    }
+  }
   
+  if (novoSinal2) {
+//    for (int i=0; i<sizeof(sinalIR2)/sizeof(*sinalIR2); i++) {
+//      sinal2.add(sinalIR2[i]);
+//    }
+//    for (int i=0; i<tamanhoSinal2; i++) {
+//      sinal2.add(sinalIR2[i]);
+//    }
+    for (int i=0; i<quant; i++) {
+      sinal2.add(sinalIR2[i]);
+    }
+  }
+
+  root.printTo(Serial);
+  Serial.println("");
+  
+  Serial.print(F("Tamanho sinal 1: "));
+  Serial.println(tamanhoSinal1);
+  Serial.print(F("Tamanho JSON 1: "));
+  Serial.println(sinal1.size());
+  Serial.print(F("Tamanho sinal 2: "));
+  Serial.println(tamanhoSinal2);
+  Serial.print(F("Tamanho JSON 2: "));
+  Serial.println(sinal2.size());
 }
 
 void enviarJSON() {
