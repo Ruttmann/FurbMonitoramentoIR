@@ -37,54 +37,51 @@ void enviarNovosSinais() {
   
 }
 
-void geraJsonSinais() {
-  const unsigned int quant = 240;
-//  const size_t bufferSize = JSON_ARRAY_SIZE(tamanhoSinal1) + JSON_ARRAY_SIZE(tamanhoSinal2) + JSON_OBJECT_SIZE(2);
-  const size_t bufferSize = JSON_ARRAY_SIZE(quant) + JSON_ARRAY_SIZE(quant) + JSON_OBJECT_SIZE(2);
-  DynamicJsonBuffer jsonBuffer(bufferSize);
+void geraJsonSinais(int tamanhoSinal, char nomeSinal[], int* sinais) {
+//  DynamicJsonBuffer jsonBuffer(JSON_ARRAY_SIZE(tamanhoSinal) + JSON_OBJECT_SIZE(1));
+  DynamicJsonBuffer jsonBuffer(JSON_ARRAY_SIZE(10) + JSON_OBJECT_SIZE(1));
   JsonObject& root = jsonBuffer.createObject();
-  JsonArray& sinal1 = root.createNestedArray("sinal1");
-  JsonArray& sinal2 = root.createNestedArray("sinal2");
+  JsonArray& sinal = root.createNestedArray(nomeSinal);
 
-  if (novoSinal1) {
-//    for (int i=0; i<sizeof(sinalIR1)/sizeof(*sinalIR1); i++) {
-//      sinal1.add(sinalIR1[i]);
-//    }
-//    for (int i=0; i<tamanhoSinal1; i++) {
-//      sinal1.add(sinalIR1[i]);
-//    }
-    for (int i=0; i<quant; i++) {
-      sinal1.add(sinalIR1[i]);
+//    for (int i=0; i<=tamanhoSinal; i++) {
+    for (int i=0; i<=10; i++) {
+      sinal.add(sinais[i]);
     }
-  }
-  
-  if (novoSinal2) {
-//    for (int i=0; i<sizeof(sinalIR2)/sizeof(*sinalIR2); i++) {
-//      sinal2.add(sinalIR2[i]);
-//    }
-//    for (int i=0; i<tamanhoSinal2; i++) {
-//      sinal2.add(sinalIR2[i]);
-//    }
-    for (int i=0; i<quant; i++) {
-      sinal2.add(sinalIR2[i]);
-    }
-  }
 
-  root.printTo(Serial);
   Serial.println("");
   
-  Serial.print(F("Tamanho sinal 1: "));
-  Serial.println(tamanhoSinal1);
-  Serial.print(F("Tamanho JSON 1: "));
-  Serial.println(sinal1.size());
-  Serial.print(F("Tamanho sinal 2: "));
-  Serial.println(tamanhoSinal2);
-  Serial.print(F("Tamanho JSON 2: "));
-  Serial.println(sinal2.size());
+  Serial.print(F("Tamanho sinal: "));
+  Serial.println(tamanhoSinal);
+  Serial.print(F("Tamanho JSON: "));
+  Serial.println(sinal.size());
+  
+  enviarJSON(root);
 }
 
-void enviarJSON() {
+void enviarJSON(JsonObject& root) {
+  String json;
+  root.printTo(json);
+  if (client.connected()) {
+//    client.sendJSON("newSignal", "{\"sinal1\":[4484,4524,556,1680,532]}");
+    client.sendJSON("newSignal", json);
+  } else {
+    Serial.println(F("ERRO: Desconectado Servidor."));
+    while(1);
+  }
   
+  while(true) {
+    enviarMensagem("haha", "tag", "manda o json");
+    delay(3000);
+    if (client.monitor()) {
+      Serial.println("ANTESS");
+      Serial.println(RID);
+      Serial.println(Rname);
+      Serial.println(Rcontent);
+//      if (RID == "resp") {
+//        Serial.println(Rcontent);
+//      }
+    }
+  }
 }
 
 void enviarMensagem(char id[], char subId[], char conteudo[]) {

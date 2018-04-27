@@ -8,7 +8,7 @@
 #include <SPI.h>
 
 /*
- * Definições de IR
+ * Definições de IR e boot do dispositivo
  */
 #include <IRremote.h>
 #define PIN_LED 7 //Pino digital do LED de feedback ao usuário
@@ -23,25 +23,23 @@
 /*
  * Definições de monitoramento 
  */
-#include <SimpleTimer.h>
 #define PIN_PIR 39 //Pino digital do sensor de presença
 #define PIN_LDR_AR 0 //Pino analógico A0 do sensor LDR ar-condicionado
 #define PIN_LDR_PR 1 //Pino analógico A1 do sensor LDR projetor
 #define PIN_LED_INIT 38 //Pino digital do led de status de inicialização do sensor PIR
 
 /*
- * Variáveis de comunicação
+ * Constantes e variáveis de comunicação
  */
 SocketIOClient client;
-byte mac[] = { 0xAA, 0x00, 0xBE, 0xEF, 0xFE, 0xEE };
-char hostname[] = "192.168.0.15";
-int port = 3000; //Não obrigatório quando se conecta com URL
-char nameSpace[] = "arduino";
+const byte mac[] = { 0xAA, 0x00, 0xBE, 0xEF, 0xFE, 0xEE };
+const char hostname[] = "192.168.0.15";
+const int port = 3000; //Não obrigatório quando se conecta com URL
+const char nameSpace[] = "arduino";
+const char identificador[] = "S403";
 extern String RID;
 extern String Rname;
 extern String Rcontent;
-const char identificador[] = "S403";
-const size_t bufferSize = JSON_ARRAY_SIZE(2) + JSON_ARRAY_SIZE(2) + JSON_OBJECT_SIZE(2);
 
 /*
  * Variáveis de IR
@@ -122,10 +120,14 @@ void boot() {
 
     if (btnIniciar) { //Finalizar boot e iniciar monitoramento
       //setupMonitoramento();
-      //setupComunicacao();
-      if (novoSinal1 || novoSinal2) {
-        geraJsonSinais();
-        //enviarNovosSinais();
+      setupComunicacao();
+      if (novoSinal1) {
+        int *sinais = sinalIR1;
+        geraJsonSinais(tamanhoSinal1, "sinal1", sinais);
+      }
+      if (novoSinal2) {
+        int *sinais = sinalIR2;
+        geraJsonSinais(tamanhoSinal2, "sinal2", sinais);
       }
       bootConcluido = true;
     }
