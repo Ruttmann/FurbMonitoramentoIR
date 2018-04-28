@@ -1,7 +1,6 @@
 /*
  * Definições de comunicação
  */
-#define W5100
 #include <SocketIOClient.h>
 #include <ArduinoJson.h>
 #include <Ethernet.h>
@@ -9,14 +8,19 @@
 
 /*
  * Definições de IR e boot do dispositivo
+ * Conexões:
+ *  IR Receiver      Arduino
+ *  V+           ->  +5v
+ *  GND          ->  GND
+ *  Signal Out   ->  Pino digital 2 (padrão biblioteca IRremote)
  */
 #include <IRremote.h>
 #define PIN_LED 7 //Pino digital do LED de feedback ao usuário
 #define PIN_TX 45 //Pino digital emissor IR
 #define PIN_RX 44 //Pino digital receptor IR
-#define PIN_CAD1 46 //Pino digital cadastrar sinal 1
-#define PIN_CAD2 47 //Pino digital cadastrar sinal 2
-#define PIN_INICIAR 48 //Pino digital iniciar operação
+#define PIN_CAD1 33 //Pino digital cadastrar sinal 1
+#define PIN_CAD2 35 //Pino digital cadastrar sinal 2
+#define PIN_INICIAR 31 //Pino digital iniciar operação
 #define MAX_LENGTH 500 //Tamanho do trem de pulsos
 #define FREQ 38 //Frequência da portadora em KHz
 
@@ -33,13 +37,18 @@
  */
 SocketIOClient client;
 const byte mac[] = { 0xAA, 0x00, 0xBE, 0xEF, 0xFE, 0xEE };
-const char hostname[] = "192.168.0.15";
+const char hostname[] = "201.54.201.49";
 const int port = 3000; //Não obrigatório quando se conecta com URL
 const char nameSpace[] = "arduino";
 const char identificador[] = "S403";
 extern String RID;
 extern String Rname;
 extern String Rcontent;
+
+/*
+ * Variáveis JSON
+ */
+StaticJsonBuffer<JSON_ARRAY_SIZE(15)> jb;
 
 /*
  * Variáveis de IR

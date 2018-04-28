@@ -26,43 +26,69 @@ void conectarServidorWS() {
   delay(1000);
 }
 
-void enviarNovosSinais() {
-  if (novoSinal1) {
-    
-  }
-
-  if (novoSinal2) {
-    
-  }
+void geraJsonSinais(unsigned int tamanhoSinal, char nomeSinal[], unsigned int* sinais) {
+  unsigned int quantDivisoes;
+  bool ehMultiplo15 = false;
+  unsigned int contadorSinal = 0;
   
-}
+  if (tamanhoSinal%15 == 0) {
+    quantDivisoes = tamanhoSinal/15;
+    ehMultiplo15 = true;
+  } else {
+    quantDivisoes = tamanhoSinal/15+1;
+    ehMultiplo15 = false;
+  }
 
-void geraJsonSinais(int tamanhoSinal, char nomeSinal[], int* sinais) {
-//  DynamicJsonBuffer jsonBuffer(JSON_ARRAY_SIZE(tamanhoSinal) + JSON_OBJECT_SIZE(1));
-  DynamicJsonBuffer jsonBuffer(JSON_ARRAY_SIZE(10) + JSON_OBJECT_SIZE(1));
-  JsonObject& root = jsonBuffer.createObject();
-  JsonArray& sinal = root.createNestedArray(nomeSinal);
-
-//    for (int i=0; i<=tamanhoSinal; i++) {
-    for (int i=0; i<=10; i++) {
-      sinal.add(sinais[i]);
+  /*
+   * Colocar dentro de um método
+   */
+  for (int i=1; i<=quantDivisoes; i++) { //Cada iteração gera um novo JSON
+    JsonArray& arrayJSON = jb.createArray();
+    if (ehMultiplo15) { //Quando o total de pulsos é múltiplo de 15
+      for (int j=contadorSinal; j<contadorSinal+15; j++) {
+        arrayJSON.add(sinais[j]);
+      }
+      contadorSinal += 15;
+    } else {
+      if (i < quantDivisoes) { //Entra aqui para gerar JSON de 15 elementos
+        for (int k=contadorSinal; k<contadorSinal+15; k++) {
+          arrayJSON.add(sinais[k]);
+        }
+        contadorSinal += 15;
+      } else { //Entra aqui para gerar o último JSON com < 15 elementos
+        for (int l=contadorSinal; l<tamanhoSinal; l++) {
+          arrayJSON.add(sinais[l]);
+        }
+        contadorSinal += tamanhoSinal - contadorSinal; //Apenas para debug, excluir após testar
+      }
     }
+    //TODO: Enviar o arrayJSON para o servidor
+  }
+  /*
+   * Colocar dentro de um método
+   */
+  
+  
+//    for (int i=0; i<=tamanhoSinal; i++) {
+//    for (int i=0; i<15; i++) {
+//      sinal.add(sinais[i]);
+//        root.add(sinais[i]);
+//    }
 
-  Serial.println("");
+//  Serial.println("");
+//  
+//  Serial.print(F("Tamanho sinal: "));
+//  Serial.println(tamanhoSinal);
+//  Serial.print(F("Tamanho JSON: "));
+//  Serial.println(root.size());
   
-  Serial.print(F("Tamanho sinal: "));
-  Serial.println(tamanhoSinal);
-  Serial.print(F("Tamanho JSON: "));
-  Serial.println(sinal.size());
-  
-  enviarJSON(root);
+//  enviarJSON(root);
 }
 
-void enviarJSON(JsonObject& root) {
+void enviarJSON(JsonArray& root) {
   String json;
   root.printTo(json);
   if (client.connected()) {
-//    client.sendJSON("newSignal", "{\"sinal1\":[4484,4524,556,1680,532]}");
     client.sendJSON("newSignal", json);
   } else {
     Serial.println(F("ERRO: Desconectado Servidor."));
@@ -77,9 +103,6 @@ void enviarJSON(JsonObject& root) {
       Serial.println(RID);
       Serial.println(Rname);
       Serial.println(Rcontent);
-//      if (RID == "resp") {
-//        Serial.println(Rcontent);
-//      }
     }
   }
 }
