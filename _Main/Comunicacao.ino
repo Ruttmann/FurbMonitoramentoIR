@@ -27,7 +27,7 @@ void conectarServidorWS() {
 }
 
 void geraJsonSinais(unsigned int tamanhoSinal, char nomeSinal[], unsigned int* sinais) {
-  unsigned int quantDivisoes;
+  unsigned int quantDivisoes = 0;
   bool ehMultiplo15 = false;
   unsigned int contadorSinal = 0;
   
@@ -43,22 +43,30 @@ void geraJsonSinais(unsigned int tamanhoSinal, char nomeSinal[], unsigned int* s
    * Colocar dentro de um método
    */
   for (int i=1; i<=quantDivisoes; i++) { //Cada iteração gera um novo JSON
+    StaticJsonBuffer<JSON_ARRAY_SIZE(15)> jb;
     JsonArray& arrayJSON = jb.createArray();
     if (ehMultiplo15) { //Quando o total de pulsos é múltiplo de 15
+      Serial.println("MULTIPLO 15");
       for (int j=contadorSinal; j<contadorSinal+15; j++) {
         arrayJSON.add(sinais[j]);
       }
       contadorSinal += 15;
+      Serial.println("MULTIPLO 15");
     } else {
       if (i < quantDivisoes) { //Entra aqui para gerar JSON de 15 elementos
+        Serial.println("NAO MULTIPLO");
         for (int k=contadorSinal; k<contadorSinal+15; k++) {
           arrayJSON.add(sinais[k]);
         }
+        arrayJSON.printTo(Serial);
+        Serial.println(arrayJSON.size());
         contadorSinal += 15;
       } else { //Entra aqui para gerar o último JSON com < 15 elementos
         for (int l=contadorSinal; l<tamanhoSinal; l++) {
           arrayJSON.add(sinais[l]);
         }
+        arrayJSON.printTo(Serial);
+        Serial.println(arrayJSON.size());
         contadorSinal += tamanhoSinal - contadorSinal; //Apenas para debug, excluir após testar
       }
     }

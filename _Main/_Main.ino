@@ -48,7 +48,7 @@ extern String Rcontent;
 /*
  * Variáveis JSON
  */
-StaticJsonBuffer<JSON_ARRAY_SIZE(15)> jb;
+//StaticJsonBuffer<JSON_ARRAY_SIZE(15)> jb;
 
 /*
  * Variáveis de IR
@@ -129,7 +129,7 @@ void boot() {
 
     if (btnIniciar) { //Finalizar boot e iniciar monitoramento
       //setupMonitoramento();
-      setupComunicacao();
+//      setupComunicacao();
       if (novoSinal1) {
         int *sinais = sinalIR1;
         geraJsonSinais(tamanhoSinal1, "sinal1", sinais);
