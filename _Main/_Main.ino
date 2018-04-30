@@ -9,15 +9,13 @@
 /*
  * Definições de IR e boot do dispositivo
  * Conexões:
- *  IR Receiver      Arduino
  *  V+           ->  +5v
  *  GND          ->  GND
- *  Signal Out   ->  Pino digital 2 (padrão biblioteca IRremote)
+ *  Signal In    ->  Pino digital 2 (padrão biblioteca IRremote)
+ *  Signal Out   ->  Pino digital 9 (padrão biblioteca IRremote)
  */
 #include <IRremote.h>
 #define PIN_LED 7 //Pino digital do LED de feedback ao usuário
-#define PIN_TX 45 //Pino digital emissor IR
-#define PIN_RX 44 //Pino digital receptor IR
 #define PIN_CAD1 33 //Pino digital cadastrar sinal 1
 #define PIN_CAD2 35 //Pino digital cadastrar sinal 2
 #define PIN_INICIAR 31 //Pino digital iniciar operação
@@ -35,27 +33,22 @@
 /*
  * Constantes e variáveis de comunicação
  */
-SocketIOClient client;
-const byte mac[] = { 0xAA, 0x00, 0xBE, 0xEF, 0xFE, 0xEE };
-const char hostname[] = "201.54.201.49";
-const int port = 3000; //Não obrigatório quando se conecta com URL
-const char nameSpace[] = "arduino";
-const char identificador[] = "S403";
-extern String RID;
-extern String Rname;
-extern String Rcontent;
-
-/*
- * Variáveis JSON
- */
-//StaticJsonBuffer<JSON_ARRAY_SIZE(15)> jb;
+SocketIOClient client; //Instância do cliente websocket
+const byte mac[] = { 0xAA, 0x00, 0xBE, 0xEF, 0xFE, 0xEE }; //MAC Address do Ethernet Shield
+const char hostname[] = "192.168.1.5"; //Hostname do servidor
+const int port = 3000; //Porta para conexão ao servidor (Não obrigatório)
+const char nameSpace[] = "arduino"; //Namespace no servidor websocket
+const char identificador[] = "S403"; //Identificador do dispositivo
+extern String RID; //Guarda o Id das mensagens recebidas do servidor
+extern String Rname; //Guarda o SubId das mensagens recebidas do servidor
+extern String Rcontent; //Guarda o conteúdo das mensagens recebidas do servidor
 
 /*
  * Variáveis de IR
  */
 IRsend irsend; //Emissor de IR
 volatile unsigned int irBuffer[MAX_LENGTH]; //Armazena os pulsos temporariamente
-volatile unsigned int x = 0; //Flag/contador do irBuffer
+volatile unsigned int x = 0; //Contador de pulsos armazenados no irBuffer
 unsigned int sinalIR1[MAX_LENGTH]; //Armazena os tempos dos pulsos do sinal 1
 unsigned int tamanhoSinal1; //Armazena a quantidade de pulsos do sinal 1
 unsigned int sinalIR2[MAX_LENGTH]; //Armazena os tempos dos pulsos do sinal 2
@@ -67,8 +60,8 @@ unsigned int tamanhoSinal2; //Armazena a quantidade de pulsos do sinal 2
 unsigned int ldrAr; //Valor do sensor LDR do ar-condicionado
 unsigned int ldrPr; //Valor do sensor LDR do projetor
 unsigned int statusPIR; //Status do sensor PIR
-bool contadorIniciado = false;
-unsigned long tempoContador = 0;
+bool contadorIniciado = false; //Controle de inicialização do contador
+unsigned long tempoContador = 0; //Contador de tempo sem detecções
 
 /*
  * Botões
@@ -80,9 +73,9 @@ unsigned int btnIniciar; //Iniciar operação
 /*
  * Flags gerais
  */
-bool novoSinal1 = false;
-bool novoSinal2 = false;
-bool rodouBoot = false;
+bool novoSinal1 = false; //TRUE se for cadastrado novo sinal 1
+bool novoSinal2 = false; //TRUE se for cadastrado novo sinal 2
+bool rodouBoot = false; //Controle de boot e execução
 
 void setup() {
   Serial.begin(9600);
@@ -103,12 +96,12 @@ void boot() {
   pinMode(PIN_CAD1, INPUT);
   pinMode(PIN_CAD2, INPUT);
   pinMode(PIN_INICIAR, INPUT);
-  pinMode(PIN_TX, INPUT);
-  pinMode(PIN_RX, INPUT);
   pinMode(PIN_PIR, INPUT);
   pinMode(PIN_LED, OUTPUT);
   pinMode(PIN_LED_INIT, OUTPUT);
   bool bootConcluido = false;
+
+  //setupMonitoramento();
 
   while (!bootConcluido) {
     btnCad1 = digitalRead(PIN_CAD1);
@@ -127,16 +120,15 @@ void boot() {
       novoSinal2 = true;
     }
 
-    if (btnIniciar) { //Finalizar boot e iniciar monitoramento
-      //setupMonitoramento();
-//      setupComunicacao();
+    if (btnIniciar) { //Finaliza boot e inicia monitoramento
+      setupComunicacao();
       if (novoSinal1) {
         int *sinais = sinalIR1;
-        geraJsonSinais(tamanhoSinal1, "sinal1", sinais);
+        geraJSONsinais(tamanhoSinal1, sinais);
       }
       if (novoSinal2) {
         int *sinais = sinalIR2;
-        geraJsonSinais(tamanhoSinal2, "sinal2", sinais);
+        geraJSONsinais(tamanhoSinal2, sinais);
       }
       bootConcluido = true;
     }
