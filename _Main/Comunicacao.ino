@@ -24,7 +24,7 @@ void conectarServidor() {
   } else {
     Serial.println(F("Conectado ao servidor..."));
   }
-  enviarMensagem("connection", "id", identificador);
+  enviarMensagem("identify", "id", identificador);
   delay(1000);
 }
 
@@ -99,12 +99,14 @@ void enviarMensagem(char id[], char subId[], char conteudo[]) {
   }
 }
 
-void receberMensagem() {
+bool recebeuJSON(char id[]) {
   if (client.monitor()) {
-    /*
-     * TODO: Através do RID, Rname e Rcontent verificar a procedência da mensagem
-     * e chamar o método correspondente para tratamento adequado
-     */
-    
+    return RID == id;
+  }
+}
+
+bool recebeuMensagem(char id[], char subId[]) {
+  if (client.monitor()) {
+    return RID == id && Rname == subId;
   }
 }

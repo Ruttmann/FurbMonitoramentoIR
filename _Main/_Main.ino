@@ -85,8 +85,16 @@ void setup() {
 void loop() {
     //Inicia monitoramento...
     if (!haMovimentos()) {
-      //Desliga dispositivos
+      enviarMensagem("monitoring", "msg", "isEmpty");
+      delay(300);
+      if (recebeuMensagem("monitoring", "msg")) {
+        //ok ou nok?
+        if (Rcontent == "ok") {
+          //começa a receber sinais
+        }
+      }
     }
+    delay(3000);
 }
 
 /*
