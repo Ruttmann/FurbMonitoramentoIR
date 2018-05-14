@@ -1,6 +1,5 @@
 /*
  * Métodos de monitoramento de presença e detecção do estado dos dispositivos
- * http://playground.arduino.cc/Code/SimpleTimer
  */
 
 void setupMonitoramento() {
@@ -24,6 +23,7 @@ bool haMovimentos() {
     if (!contadorIniciado) { //Se ainda não houve ausência de movimento
       contadorIniciado = !contadorIniciado;
       tempoContador = millis();
+      return true;
     } else { //Já foi iniciada uma contagem. Verifica há quanto tempo está sem movimentação
       if ((millis() - tempoContador) >= 60000) {
         return false;

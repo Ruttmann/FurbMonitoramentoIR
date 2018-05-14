@@ -110,3 +110,7 @@ bool recebeuMensagem(char id[], char subId[]) {
     return RID == id && Rname == subId;
   }
 }
+
+bool recebeSinais() {
+  
+}

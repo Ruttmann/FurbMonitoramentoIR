@@ -85,12 +85,12 @@ void setup() {
 void loop() {
     //Inicia monitoramento...
     if (!haMovimentos()) {
-      enviarMensagem("monitoring", "msg", "isEmpty");
+      enviarMensagem("monitoring", "msg", "emptyRoom");
       delay(300);
       if (recebeuMensagem("monitoring", "msg")) {
-        //ok ou nok?
         if (Rcontent == "ok") {
-          //começa a receber sinais
+          if (recebeSinais())
+            desligaDispositivos();
         }
       }
     }
