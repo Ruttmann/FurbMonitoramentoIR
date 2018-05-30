@@ -111,6 +111,22 @@ bool recebeuMensagem(char id[], char subId[]) {
   }
 }
 
-bool recebeSinais() {
-  
+bool recebeuSinais() {
+  bool receiving = true;
+  enviarMensagem("monitoring", "msg", "getSignal");
+  delay(2000);
+  while(receiving) {
+    if (recebeuMensagem("monitoring", "msg")) {
+      if (Rcontent == "endSignals") {
+        return true;
+      }
+      
+      enviarMensagem("monitoring", "msg", "sigRecv");
+    }
+  }
 }
+
+
+
+
+

@@ -35,7 +35,7 @@
  */
 SocketIOClient client; //Instância do cliente websocket
 const byte mac[] = { 0xAA, 0x00, 0xBE, 0xEF, 0xFE, 0xEE }; //MAC Address do Ethernet Shield
-const char hostname[] = "192.168.1.5"; //Hostname do servidor
+const char hostname[] = "192.168.0.15"; //Hostname do servidor
 const int port = 3000; //Porta para conexão ao servidor (Não obrigatório)
 const char nameSpace[] = "arduino"; //Namespace no servidor websocket
 const char identificador[] = "S403"; //Identificador do dispositivo
@@ -79,17 +79,27 @@ bool rodouBoot = false; //Controle de boot e execução
 
 void setup() {
   Serial.begin(9600);
-  boot();
+  //boot();
 }
 
 void loop() {
+    setupComunicacao();
+//    while(true) {
+//      enviarMensagem("test", "msg", "send");
+//      delay(3000);
+//      if (recebeuJSON("test")) {
+//        Serial.println(Rcontent);
+//      }
+//    }
+  
     //Inicia monitoramento...
     if (!haMovimentos()) {
+//    while(true) {
       enviarMensagem("monitoring", "msg", "emptyRoom");
-      delay(300);
+      delay(1000);
       if (recebeuMensagem("monitoring", "msg")) {
         if (Rcontent == "ok") {
-          if (recebeSinais())
+          if (recebeuSinais())
             desligaDispositivos();
         }
       }
@@ -139,6 +149,7 @@ void boot() {
         geraJSONsinais(tamanhoSinal2, sinais);
       }
       bootConcluido = true;
+      enviarMensagem("endBoot", "msg", "start");
     }
   }
   rodouBoot = true;
