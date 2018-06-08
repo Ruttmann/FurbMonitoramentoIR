@@ -83,28 +83,11 @@ void setup() {
 }
 
 void loop() {
-    setupComunicacao();
-//    while(true) {
-//      enviarMensagem("test", "msg", "send");
-//      delay(3000);
-//      if (recebeuJSON("test")) {
-//        Serial.println(Rcontent);
-//      }
-//    }
-  
-    //Inicia monitoramento...
-    if (!haMovimentos()) {
-//    while(true) {
-      enviarMensagem("monitoring", "msg", "emptyRoom");
-      delay(1000);
-      if (recebeuMensagem("monitoring", "msg")) {
-        if (Rcontent == "ok") {
-          if (recebeuSinais())
-            desligaDispositivos();
-        }
-      }
-    }
-    delay(3000);
+  //Inicia monitoramento...
+  if (!haMovimentos()) {
+    notificaServidor();
+  }
+  delay(3000);
 }
 
 /*
@@ -148,6 +131,7 @@ void boot() {
         int *sinais = sinalIR2;
         geraJSONsinais(tamanhoSinal2, sinais);
       }
+      zerarArraysIR();
       bootConcluido = true;
       enviarMensagem("endBoot", "msg", "start");
     }

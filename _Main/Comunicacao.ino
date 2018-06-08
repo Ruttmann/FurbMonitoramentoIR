@@ -25,7 +25,7 @@ void conectarServidor() {
     Serial.println(F("Conectado ao servidor..."));
   }
   enviarMensagem("identify", "id", identificador);
-  delay(1000);
+  delay(2000);
 }
 
 void geraJSONsinais(unsigned int tamanhoSinal, unsigned int* sinais) {
@@ -78,6 +78,11 @@ void geraJSONsinais(unsigned int tamanhoSinal, unsigned int* sinais) {
    enviarMensagem("sigSend", "msg", "end"); //Avisa ao servidor que o envio de sinais terminou
 }
 
+void zerarArraysIR() {
+  memset(sinalIR1,0,sizeof(sinalIR1));
+  memset(sinalIR2,0,sizeof(sinalIR2));
+}
+
 void enviarJSON(char id[], JsonArray& json) {
   String jsonString;
   json.printTo(jsonString);
@@ -111,22 +116,85 @@ bool recebeuMensagem(char id[], char subId[]) {
   }
 }
 
-bool recebeuSinais() {
-  bool receiving = true;
-  enviarMensagem("monitoring", "msg", "getSignal");
+void notificaServidor() {
+  enviarMensagem("monitoring", "msg", "emptyRoom");
   delay(2000);
-  while(receiving) {
-    if (recebeuMensagem("monitoring", "msg")) {
-      if (Rcontent == "endSignals") {
-        return true;
+  if (recebeuMensagem("monitoring", "msg")) {
+    if (Rcontent == "ok") {
+      if (recebeuSinais()) {
+        desligaDispositivos();
       }
-      
-      enviarMensagem("monitoring", "msg", "sigRecv");
+    } else {
+      Serial.println("Fora do período de desligamento.");
     }
   }
 }
 
+bool recebeuSinais() {
+  enviarMensagem("monitoring", "msg", "getSignal");
+  delay(2000);
+  if (recebeuMensagem("monitoring", "msg")) {
+    if (Rcontent == "signal1") {
+      recebeSinal1();
+    } 
+    recebeSinal2();
+  }
+  
+//  while(receiving) {
+//    if (recebeuMensagem("monitoring", "msg")) {
+//      if (Rcontent == "endSignals") {
+//        return true;
+//      } else if (Rcontent == "signal1") {
+//        enviarMensagem("monitoring", "msg", "send1");
+//      }
+//    } 
+//      enviarMensagem("monitoring", "msg", "sigRecv");
+//  }
+}
 
+void recebeSinal1() {
+  bool receiving = true;
+  while(receiving) {
+    if (recebeuMensagem("monitoring", "msg")) {
+      if (Rcontent == "endSignals") {
+        return;
+      }
+    }
+    armazenaSinal("send1");
+  }
+}
 
+void recebeSinal2() {
+  enviarMensagem("monitoring", "msg", "haveSig2");
+  delay(2000);
+  if (recebeuMensagem("monitoring", "msg")) {
+    if (Rcontent == "signal2") {
+      bool receiving = true;
+      while (receiving) {
+        if (recebeuMensagem("monitoring", "msg")) {
+          if (Rcontent == "endSignals") {
+            return;
+          }
+        }
+        armazenaSinal("send2");
+      }
+    }
+  }
+}
 
-
+void armazenaSinal(char idSinal[]) {
+  StaticJsonBuffer<JSON_ARRAY_SIZE(15)> jb;
+  bool receiving = true;
+  enviarMensagem("monitoring", "msg", idSinal);
+  delay(1000);
+  while (receiving) {
+    if (recebeuJSON("sigPart")) {
+      JsonArray& arrayJSON = jb.parseArray(Rcontent);
+    }
+    if (recebeuMensagem("monitoring", "msg")) {
+      if (Rcontent == "endSignals") {
+        return;
+      }
+    }
+  }
+}
