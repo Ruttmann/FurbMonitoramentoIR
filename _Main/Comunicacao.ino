@@ -119,82 +119,69 @@ bool recebeuMensagem(char id[], char subId[]) {
 void notificaServidor() {
   enviarMensagem("monitoring", "msg", "emptyRoom");
   delay(2000);
-  if (recebeuMensagem("monitoring", "msg")) {
-    if (Rcontent == "ok") {
-      if (recebeuSinais()) {
-        desligaDispositivos();
-      }
-    } else {
-      Serial.println("Fora do período de desligamento.");
+  if (recebeuMensagem("monitoring", "msg") && Rcontent == "ok") {
+    if (recebeuSinais()) {
+      desligaDispositivos();
     }
+  } else {
+    Serial.println("Fora do período de desligamento.");
   }
 }
 
 bool recebeuSinais() {
+  bool rec1 = false;
+  bool rec2 = false;
   enviarMensagem("monitoring", "msg", "getSignal");
   delay(2000);
-  if (recebeuMensagem("monitoring", "msg")) {
-    if (Rcontent == "signal1") {
-      recebeSinal1();
-    } 
-    recebeSinal2();
+  if (recebeuMensagem("monitoring", "msg") && Rcontent == "signal1") {
+    rec1 = recebeSinal1();
   }
+  rec2 = recebeSinal2();
   
-//  while(receiving) {
-//    if (recebeuMensagem("monitoring", "msg")) {
-//      if (Rcontent == "endSignals") {
-//        return true;
-//      } else if (Rcontent == "signal1") {
-//        enviarMensagem("monitoring", "msg", "send1");
-//      }
-//    } 
-//      enviarMensagem("monitoring", "msg", "sigRecv");
-//  }
+  return rec1 || rec2;
 }
 
-void recebeSinal1() {
+bool recebeSinal1() {
   bool receiving = true;
   while(receiving) {
-    if (recebeuMensagem("monitoring", "msg")) {
-      if (Rcontent == "endSignals") {
-        return;
-      }
+    if (recebeuMensagem("monitoring", "msg") && Rcontent == "endSignals") {
+      return;
     }
-    armazenaSinal("send1");
+    armazenaSinal(1);
   }
 }
 
-void recebeSinal2() {
+bool recebeSinal2() {
   enviarMensagem("monitoring", "msg", "haveSig2");
   delay(2000);
-  if (recebeuMensagem("monitoring", "msg")) {
-    if (Rcontent == "signal2") {
-      bool receiving = true;
-      while (receiving) {
-        if (recebeuMensagem("monitoring", "msg")) {
-          if (Rcontent == "endSignals") {
-            return;
-          }
-        }
-        armazenaSinal("send2");
+  if (recebeuMensagem("monitoring", "msg") && Rcontent == "signal2") {
+    bool receiving = true;
+    while (receiving) {
+      if (recebeuMensagem("monitoring", "msg") && Rcontent == "endSignals") {
+        return;
       }
+      armazenaSinal(2);
     }
   }
 }
 
-void armazenaSinal(char idSinal[]) {
+void armazenaSinal(unsigned int idSinal) {
   StaticJsonBuffer<JSON_ARRAY_SIZE(15)> jb;
   bool receiving = true;
-  enviarMensagem("monitoring", "msg", idSinal);
+  
+  if (idSinal == 1) {
+    enviarMensagem("monitoring", "msg", "send1");
+  } else {
+    enviarMensagem("monitoring", "msg", "send2");
+  }
+  
   delay(1000);
   while (receiving) {
     if (recebeuJSON("sigPart")) {
       JsonArray& arrayJSON = jb.parseArray(Rcontent);
     }
-    if (recebeuMensagem("monitoring", "msg")) {
-      if (Rcontent == "endSignals") {
-        return;
-      }
+    if (recebeuMensagem("monitoring", "msg") && Rcontent == "endSignals") {
+      return;
     }
   }
 }
