@@ -15,7 +15,7 @@
  *  Signal Out   ->  Pino digital 9 (padrão biblioteca IRremote)
  */
 #include <IRremote.h>
-#define PIN_LED 7 //Pino digital do LED de feedback ao usuário
+//#define PIN_LED 7 //Pino digital do LED de feedback ao usuário
 #define PIN_CAD1 33 //Pino digital cadastrar sinal 1
 #define PIN_CAD2 35 //Pino digital cadastrar sinal 2
 #define PIN_INICIAR 31 //Pino digital iniciar operação
@@ -28,7 +28,7 @@
 #define PIN_PIR 39 //Pino digital do sensor de presença
 #define PIN_LDR_AR 0 //Pino analógico A0 do sensor LDR ar-condicionado
 #define PIN_LDR_PR 1 //Pino analógico A1 do sensor LDR projetor
-#define PIN_LED_INIT 38 //Pino digital do led de status de inicialização do sensor PIR
+//#define PIN_LED_INIT 38 //Pino digital do led de status de inicialização do sensor PIR
 
 /*
  * Constantes e variáveis de comunicação
@@ -38,7 +38,7 @@ const byte mac[] = { 0xAA, 0x00, 0xBE, 0xEF, 0xFE, 0xEE }; //MAC Address do Ethe
 const char hostname[] = "192.168.0.15"; //Hostname do servidor
 const int port = 3000; //Porta para conexão ao servidor (Não obrigatório)
 const char nameSpace[] = "arduino"; //Namespace no servidor websocket
-const char identificador[] = "S403"; //Identificador do dispositivo
+const char identificador[] = "S555"; //Identificador do dispositivo
 extern String RID; //Guarda o Id das mensagens recebidas do servidor
 extern String Rname; //Guarda o SubId das mensagens recebidas do servidor
 extern String Rcontent; //Guarda o conteúdo das mensagens recebidas do servidor
@@ -79,7 +79,7 @@ bool rodouBoot = false; //Controle de boot e execução
 
 void setup() {
   Serial.begin(9600);
-  //boot();
+  boot();
 }
 
 void loop() {
@@ -98,8 +98,8 @@ void boot() {
   pinMode(PIN_CAD2, INPUT);
   pinMode(PIN_INICIAR, INPUT);
   pinMode(PIN_PIR, INPUT);
-  pinMode(PIN_LED, OUTPUT);
-  pinMode(PIN_LED_INIT, OUTPUT);
+//  pinMode(PIN_LED, OUTPUT);
+//  pinMode(PIN_LED_INIT, OUTPUT);
   bool bootConcluido = false;
 
   //setupMonitoramento();

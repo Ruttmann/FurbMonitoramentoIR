@@ -2,15 +2,15 @@
  * Métodos de monitoramento de presença e detecção do estado dos dispositivos
  */
 
-void setupMonitoramento() {
-  Serial.println("Aguarde 1 minuto, inicializando sensor PIR...");
-  for (int i=0; i<60; i++) {
-     digitalWrite(PIN_LED_INIT, HIGH);
-     delay(500);
-     digitalWrite(PIN_LED_INIT, LOW);
-     delay(500);
-  }
-}
+//void setupMonitoramento() {
+//  Serial.println("Aguarde 1 minuto, inicializando sensor PIR...");
+//  for (int i=0; i<60; i++) {
+//     digitalWrite(PIN_LED_INIT, HIGH);
+//     delay(500);
+//     digitalWrite(PIN_LED_INIT, LOW);
+//     delay(500);
+//  }
+//}
 
 /*
  * O sensor PIR deve estar configurado para manter saída alta
@@ -65,5 +65,15 @@ bool projetorEstaLigado() {
 }
 
 void desligaDispositivos() {
-  //TODO
+  if (arEstaLigado()) {
+    sendRawSignal(true);
+  }
+
+  if (projetorEstaLigado()) {
+    sendRawSignal(false);
+    delay(1000);
+    if (projetorEstaLigado()) {
+      sendRawSignal(false);
+    }
+  }
 }
