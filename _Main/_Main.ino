@@ -88,6 +88,10 @@ void loop() {
     notificaServidor();
   }
   delay(3000);
+  //btnIniciar = digitalRead(PIN_INICIAR);
+  //if (btnIniciar) {
+  //  notificaServidor();
+  //}
 }
 
 /*
@@ -133,6 +137,8 @@ void boot() {
       }
       zerarArraysIR();
       bootConcluido = true;
+      delay(3000);
+      Serial.println(F("Finalizando boot do dispositivo..."));
       enviarMensagem("endBoot", "msg", "start");
     }
   }

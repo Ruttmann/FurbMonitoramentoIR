@@ -49,12 +49,6 @@ void interruptHandlerRX() {
  * Envio do sinal IR RAW
  */
 void sendRawSignal(bool sinal1) {
-//  unsigned int tamSinal;
-//  if (sinal1) {
-//    tamSinal = tamanhoSinal1;
-//  } else {
-//    tamSinal = tamanhoSinal2;
-//  }
   irsend.enableIROut(FREQ); //Habilita emissor
   for(unsigned int i = 0; i < MAX_LENGTH; i++) {
     if (i & 1) {
