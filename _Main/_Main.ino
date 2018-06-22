@@ -28,14 +28,14 @@
 #define PIN_PIR 39 //Pino digital do sensor de presença
 #define PIN_LDR_AR 0 //Pino analógico A0 do sensor LDR ar-condicionado
 #define PIN_LDR_PR 1 //Pino analógico A1 do sensor LDR projetor
-//#define PIN_LED_INIT 38 //Pino digital do led de status de inicialização do sensor PIR
+#define PIN_LED_INIT 38 //Pino digital do led de status de inicialização do sensor PIR
 
 /*
  * Constantes e variáveis de comunicação
  */
 SocketIOClient client; //Instância do cliente websocket
 const byte mac[] = { 0xAA, 0x00, 0xBE, 0xEF, 0xFE, 0xEE }; //MAC Address do Ethernet Shield
-const char hostname[] = "192.168.0.15"; //Hostname do servidor
+const char hostname[] = "pdge4-furb.herokuapp.com"; //Hostname do servidor
 const int port = 3000; //Porta para conexão ao servidor (Não obrigatório)
 const char nameSpace[] = "arduino"; //Namespace no servidor websocket
 const char identificador[] = "S555"; //Identificador do dispositivo
@@ -84,29 +84,31 @@ void setup() {
 
 void loop() {
   //Inicia monitoramento...
-  if (!haMovimentos()) {
+//  if (!haMovimentos()) {
+//    Serial.println("Ausência de movimentos...");
+//    notificaServidor();
+//  } else {
+//    Serial.println("Tem movimentos...");
+//  }
+//  delay(3000);
+  btnIniciar = digitalRead(PIN_INICIAR);
+  if (btnIniciar) {
     notificaServidor();
   }
-  delay(3000);
-  //btnIniciar = digitalRead(PIN_INICIAR);
-  //if (btnIniciar) {
-  //  notificaServidor();
-  //}
 }
 
 /*
  * Rotinas de boot do Arduino
  */
 void boot() {
+//  setupMonitoramento();
+  
   pinMode(PIN_CAD1, INPUT);
   pinMode(PIN_CAD2, INPUT);
   pinMode(PIN_INICIAR, INPUT);
-  pinMode(PIN_PIR, INPUT);
+  pinMode(PIN_PIR, INPUT_PULLUP);
 //  pinMode(PIN_LED, OUTPUT);
-//  pinMode(PIN_LED_INIT, OUTPUT);
   bool bootConcluido = false;
-
-  //setupMonitoramento();
 
   while (!bootConcluido) {
     btnCad1 = digitalRead(PIN_CAD1);

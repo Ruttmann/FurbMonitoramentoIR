@@ -19,7 +19,8 @@ void ficarOnline() {
 
 void conectarServidor() {
   Serial.println("Conectando...");
-  if (!client.connect(hostname, port, nameSpace)) {
+//  if (!client.connect(hostname, port, nameSpace)) {
+  if (!client.connect(hostname, nameSpace)) {
     Serial.println(F("ERRO: Conexão Servidor!"));
   } else {
     Serial.println(F("Conectado ao servidor..."));
@@ -174,4 +175,12 @@ void recebeSinal(char idSinal[]) {
     else
       sinalIR2[i] = sinalIR[i];
   }
+
+  //DEBUG
+//  if (idSinal == "send1") {
+//    Serial.println("Enviando comando!");
+//    sendRawSignal(true);
+//    Serial.println("Fim envio comando!");
+//  }
+  //DEBUG
 }
