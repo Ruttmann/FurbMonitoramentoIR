@@ -175,12 +175,4 @@ void recebeSinal(char idSinal[]) {
     else
       sinalIR2[i] = sinalIR[i];
   }
-
-  //DEBUG
-//  if (idSinal == "send1") {
-//    Serial.println("Enviando comando!");
-//    sendRawSignal(true);
-//    Serial.println("Fim envio comando!");
-//  }
-  //DEBUG
 }

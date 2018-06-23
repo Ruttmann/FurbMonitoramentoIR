@@ -18,30 +18,18 @@ void setupMonitoramento() {
  * O sensor PIR deve estar configurado para manter saída alta
  * durante 1 minuto a cada detecção.
  */
-bool haMovimentos() {
-  if (digitalRead(PIN_PIR) == LOW) { //Se não há movimento na sala
-    if (!contadorIniciado) { //Se ainda não houve ausência de movimento
-      contadorIniciado = !contadorIniciado;
-      tempoContador = millis();
-      return true;
-    } else { //Já foi iniciada uma contagem. Verifica há quanto tempo está sem movimentação
-      if ((millis() - tempoContador) >= 60000) {
-        return false;
-      }
-    }
-  }
-  //Se há movimento na sala
-  contadorIniciado = false;
-  tempoContador = 0;
-  return true;
+bool haMovimentos(int pirStatus) {
+
 }
 
 bool arEstaLigado() {
   ldrAr = analogRead(PIN_LDR_AR);
 
   if (ldrAr >= 600) { //Desligado
+    Serial.println("Ar-condicionado desligado...");
     return false;    
   } else { //Ligado
+    Serial.println("Ar-condicionado ligado...");
     return true;
   }
 }
@@ -50,22 +38,28 @@ bool projetorEstaLigado() {
   ldrPr = analogRead(PIN_LDR_PR);
   
   if (ldrPr >= 150) { //Desligado
+    Serial.println("Projetor desligado...");
     return false;
   } else {
+    Serial.println("Projetor ligado...");
     return true;
   }
 }
 
 void desligaDispositivos() {
-  if (arEstaLigado()) {
-    sendRawSignal(true);
-  }
+  sendRawSignal(true);
+  delay(3000);
+  sendRawSignal(false);
+  
+//  if (arEstaLigado()) {
+//    sendRawSignal(true);
+//  }
 
-  if (projetorEstaLigado()) {
-    sendRawSignal(false);
-    delay(3000);
-    if (projetorEstaLigado()) {
-      sendRawSignal(false);
-    }
-  }
+//  if (projetorEstaLigado()) {
+//    sendRawSignal(false);
+//    delay(3000);
+//    if (projetorEstaLigado()) {
+//      sendRawSignal(false);
+//    }
+//  }
 }

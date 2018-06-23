@@ -76,6 +76,7 @@ unsigned int btnIniciar; //Iniciar operação
 bool novoSinal1 = false; //TRUE se for cadastrado novo sinal 1
 bool novoSinal2 = false; //TRUE se for cadastrado novo sinal 2
 bool rodouBoot = false; //Controle de boot e execução
+bool movimento = false;
 
 void setup() {
   Serial.begin(9600);
@@ -83,18 +84,40 @@ void setup() {
 }
 
 void loop() {
+  statusPIR = digitalRead(PIN_PIR);
+
+  if (!statusPIR) {
+    Serial.println("NADA!");
+    if (!contadorIniciado) {
+      contadorIniciado = true;
+      tempoContador = millis();
+    } else {
+      if ((millis() - tempoContador) >= 10000) {
+        Serial.println("Manda desligar!");
+        notificaServidor();
+        while(true) {}
+      }
+    }
+  } else {
+    Serial.println("MOVIMENTO");
+    contadorIniciado = false;
+    tempoContador = 0;
+  }
+
   //Inicia monitoramento...
-//  if (!haMovimentos()) {
+//  if (!haMovimentos(statusPIR)) {
 //    Serial.println("Ausência de movimentos...");
 //    notificaServidor();
 //  } else {
 //    Serial.println("Tem movimentos...");
 //  }
 //  delay(3000);
-  btnIniciar = digitalRead(PIN_INICIAR);
-  if (btnIniciar) {
-    notificaServidor();
-  }
+
+
+//  btnIniciar = digitalRead(PIN_INICIAR);
+//  if (btnIniciar) {
+//    notificaServidor();
+//  }
 }
 
 /*
@@ -106,8 +129,8 @@ void boot() {
   pinMode(PIN_CAD1, INPUT);
   pinMode(PIN_CAD2, INPUT);
   pinMode(PIN_INICIAR, INPUT);
-  pinMode(PIN_PIR, INPUT_PULLUP);
-//  pinMode(PIN_LED, OUTPUT);
+  pinMode(PIN_PIR, INPUT);
+  pinMode(PIN_LED_INIT, OUTPUT);
   bool bootConcluido = false;
 
   while (!bootConcluido) {
