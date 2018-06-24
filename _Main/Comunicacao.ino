@@ -52,6 +52,7 @@ void ativarStandBy() {
   Serial.println(F("Entrando em stand-by..."));
   zerarArraysIR();
   desconectarServidor();
+  delay(10000);
 }
 
 void geraJSONsinais(unsigned int tamanhoSinal, unsigned int* sinais) {

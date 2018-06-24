@@ -67,6 +67,8 @@ void desligaDispositivos() {
     sendRawSignal(true);
   }
 
+  delay(5000);
+
   if (projetorEstaLigado()) {
     Serial.println(F("Desligando projetor..."));
     sendRawSignal(false);
