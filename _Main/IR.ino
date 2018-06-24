@@ -30,8 +30,10 @@ void loopIR(bool sinal1) {
       Serial.println();
       if (sinal1) {
         tamanhoSinal1 = x - 1;
+        novoSinal1 = true;
       } else {
         tamanhoSinal2 = x - 1;
+        novoSinal2 = true;
       }
       x = 0;
     }
@@ -64,4 +66,9 @@ void sendRawSignal(bool sinal1) {
     }  
   }
   irsend.space(1);
+}
+
+void zerarArraysIR() {
+  memset(sinalIR1,0,sizeof(sinalIR1));
+  memset(sinalIR2,0,sizeof(sinalIR2));
 }

@@ -2,34 +2,49 @@
  * Métodos de monitoramento de presença e detecção do estado dos dispositivos
  */
 
-void setupMonitoramento() {
-  pinMode(PIN_LED_INIT, OUTPUT);
-  Serial.println("Aguarde 1 minuto, inicializando sensor PIR...");
-  for (int i=0; i<63; i++) {
-     digitalWrite(PIN_LED_INIT, HIGH);
-     delay(500);
-     digitalWrite(PIN_LED_INIT, LOW);
-     delay(500);
+void monitoraSalaCheia() {
+  statusPIR = digitalRead(PIN_PIR);
+  
+  if (!statusPIR) { //Não há movimentação
+    digitalWrite(PIN_LED_FDB, LOW);
+    if (!contadorIniciado) {
+      contadorIniciado = true;
+      tempoContador = millis();
+    } else {
+      if ((millis() - tempoContador) >= 10000) {
+        Serial.println(F("Requisitando autorização para desligar dispositivos..."));
+        notificaServidor();
+        contadorIniciado = false;
+        tempoContador = 0;
+      }
+    }
+  } else { //Há movimentação
+    digitalWrite(PIN_LED_FDB, HIGH);
+    contadorIniciado = false;
+    tempoContador = 0;
   }
-  Serial.println("Sensor PIR inicializado...");
 }
 
-/*
- * O sensor PIR deve estar configurado para manter saída alta
- * durante 1 minuto a cada detecção.
- */
-bool haMovimentos(int pirStatus) {
-
+void monitoraSalaVazia() {
+  statusPIR = digitalRead(PIN_PIR);
+  
+  if (statusPIR) { //Há movimentação
+    digitalWrite(PIN_LED_FDB, HIGH);
+    Serial.println(F("Reconectando dispositivo ao servidor..."));
+    setupComunicacao();
+    salaVazia = false;
+    Serial.println(F("Retomando monitoramento..."));
+  }
 }
 
 bool arEstaLigado() {
   ldrAr = analogRead(PIN_LDR_AR);
 
   if (ldrAr >= 600) { //Desligado
-    Serial.println("Ar-condicionado desligado...");
+    Serial.println(F("Ar-condicionado desligado..."));
     return false;    
   } else { //Ligado
-    Serial.println("Ar-condicionado ligado...");
+    Serial.println(F("Ar-condicionado ligado..."));
     return true;
   }
 }
@@ -38,28 +53,27 @@ bool projetorEstaLigado() {
   ldrPr = analogRead(PIN_LDR_PR);
   
   if (ldrPr >= 150) { //Desligado
-    Serial.println("Projetor desligado...");
+    Serial.println(F("Projetor desligado..."));
     return false;
   } else {
-    Serial.println("Projetor ligado...");
+    Serial.println(F("Projetor ligado..."));
     return true;
   }
 }
 
-void desligaDispositivos() {
-  sendRawSignal(true);
-  delay(3000);
-  sendRawSignal(false);
-  
-//  if (arEstaLigado()) {
-//    sendRawSignal(true);
-//  }
+void desligaDispositivos() { 
+  if (arEstaLigado()) {
+    Serial.println(F("Desligando ar-condicionado..."));
+    sendRawSignal(true);
+  }
 
-//  if (projetorEstaLigado()) {
-//    sendRawSignal(false);
-//    delay(3000);
-//    if (projetorEstaLigado()) {
-//      sendRawSignal(false);
-//    }
-//  }
+  if (projetorEstaLigado()) {
+    Serial.println(F("Desligando projetor..."));
+    sendRawSignal(false);
+    delay(3000);
+    if (projetorEstaLigado()) {
+      Serial.println(F("Enviado segundo sinal ao projetor..."));
+      sendRawSignal(false);
+    }
+  }
 }

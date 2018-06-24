@@ -7,20 +7,23 @@
 #include <SPI.h>
 
 /*
- * Definições de IR e boot do dispositivo
+ * Definições de IR
  * Conexões:
  *  V+           ->  +5v
  *  GND          ->  GND
  *  Signal In    ->  Pino digital 2 (padrão biblioteca IRremote)
- *  Signal Out   ->  Pino digital 9 (padrão biblioteca IRremote)
+ *  Signal Out   ->  Pino digital 46 (customizado na biblioteca IRremote)
  */
 #include <IRremote.h>
-//#define PIN_LED 7 //Pino digital do LED de feedback ao usuário
-#define PIN_CAD1 33 //Pino digital cadastrar sinal 1
-#define PIN_CAD2 35 //Pino digital cadastrar sinal 2
-#define PIN_INICIAR 31 //Pino digital iniciar operação
 #define MAX_LENGTH 500 //Tamanho do trem de pulsos
 #define FREQ 38 //Frequência da portadora em KHz
+
+/*
+ * Definições de boot
+ */
+#define PIN_INICIAR 7 //Pino digital iniciar operação
+#define PIN_CAD1 6 //Pino digital cadastrar sinal 1
+#define PIN_CAD2 5 //Pino digital cadastrar sinal 2
 
 /*
  * Definições de monitoramento 
@@ -28,7 +31,7 @@
 #define PIN_PIR 39 //Pino digital do sensor de presença
 #define PIN_LDR_AR 0 //Pino analógico A0 do sensor LDR ar-condicionado
 #define PIN_LDR_PR 1 //Pino analógico A1 do sensor LDR projetor
-#define PIN_LED_INIT 38 //Pino digital do led de status de inicialização do sensor PIR
+#define PIN_LED_FDB 53 //Pino digital do led de status de inicialização do sensor PIR
 
 /*
  * Constantes e variáveis de comunicação
@@ -42,6 +45,7 @@ const char identificador[] = "S555"; //Identificador do dispositivo
 extern String RID; //Guarda o Id das mensagens recebidas do servidor
 extern String Rname; //Guarda o SubId das mensagens recebidas do servidor
 extern String Rcontent; //Guarda o conteúdo das mensagens recebidas do servidor
+unsigned long contKeepAlive = 0; //Contador para envio de mensagem keepAlive
 
 /*
  * Variáveis de IR
@@ -62,6 +66,7 @@ unsigned int ldrPr; //Valor do sensor LDR do projetor
 unsigned int statusPIR; //Status do sensor PIR
 bool contadorIniciado = false; //Controle de inicialização do contador
 unsigned long tempoContador = 0; //Contador de tempo sem detecções
+bool salaVazia = false; //Flag de controle das modalidades de monitoramento
 
 /*
  * Botões
@@ -76,7 +81,6 @@ unsigned int btnIniciar; //Iniciar operação
 bool novoSinal1 = false; //TRUE se for cadastrado novo sinal 1
 bool novoSinal2 = false; //TRUE se for cadastrado novo sinal 2
 bool rodouBoot = false; //Controle de boot e execução
-bool movimento = false;
 
 void setup() {
   Serial.begin(9600);
@@ -84,53 +88,23 @@ void setup() {
 }
 
 void loop() {
-  statusPIR = digitalRead(PIN_PIR);
-
-  if (!statusPIR) {
-    Serial.println("NADA!");
-    if (!contadorIniciado) {
-      contadorIniciado = true;
-      tempoContador = millis();
-    } else {
-      if ((millis() - tempoContador) >= 10000) {
-        Serial.println("Manda desligar!");
-        notificaServidor();
-        while(true) {}
-      }
-    }
+  if (salaVazia) {
+    monitoraSalaVazia();
   } else {
-    Serial.println("MOVIMENTO");
-    contadorIniciado = false;
-    tempoContador = 0;
+    enviarKeepAlive();
+    monitoraSalaCheia();
   }
-
-  //Inicia monitoramento...
-//  if (!haMovimentos(statusPIR)) {
-//    Serial.println("Ausência de movimentos...");
-//    notificaServidor();
-//  } else {
-//    Serial.println("Tem movimentos...");
-//  }
-//  delay(3000);
-
-
-//  btnIniciar = digitalRead(PIN_INICIAR);
-//  if (btnIniciar) {
-//    notificaServidor();
-//  }
 }
 
 /*
  * Rotinas de boot do Arduino
  */
 void boot() {
-//  setupMonitoramento();
-  
   pinMode(PIN_CAD1, INPUT);
   pinMode(PIN_CAD2, INPUT);
   pinMode(PIN_INICIAR, INPUT);
   pinMode(PIN_PIR, INPUT);
-  pinMode(PIN_LED_INIT, OUTPUT);
+  pinMode(PIN_LED_FDB, OUTPUT);
   bool bootConcluido = false;
 
   while (!bootConcluido) {
@@ -142,12 +116,10 @@ void boot() {
       Serial.println(F("Cadastrar sinal 1"));
       setupIR();
       loopIR(true);
-      novoSinal1 = true;
     } else if (btnCad2) { //Cadastrar sinal 2
       Serial.println(F("Cadastrar sinal 2"));
       setupIR();
       loopIR(false);
-      novoSinal2 = true;
     }
 
     if (btnIniciar) { //Finaliza boot e inicia monitoramento
@@ -163,8 +135,9 @@ void boot() {
       zerarArraysIR();
       bootConcluido = true;
       delay(3000);
-      Serial.println(F("Finalizando boot do dispositivo..."));
+      Serial.println(F("Fim do boot..."));
       enviarMensagem("endBoot", "msg", "start");
+      Serial.println(F("Iniciando monitoramento..."));
     }
   }
   rodouBoot = true;
