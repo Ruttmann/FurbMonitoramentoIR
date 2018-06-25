@@ -28,7 +28,7 @@
 /*
  * Definições de monitoramento 
  */
-#define PIN_PIR 39 //Pino digital do sensor de presença
+#define PIN_PIR 37 //Pino digital do sensor de presença
 #define PIN_LDR_AR 0 //Pino analógico A0 do sensor LDR ar-condicionado
 #define PIN_LDR_PR 1 //Pino analógico A1 do sensor LDR projetor
 #define PIN_LED_FDB 53 //Pino digital do led de status de inicialização do sensor PIR
