@@ -42,9 +42,13 @@ bool arEstaLigado() {
 
   if (ldrAr >= 600) { //Desligado
     Serial.println(F("Ar-condicionado desligado..."));
+    Serial.print(F("Medição: "));
+    Serial.println(ldrAr);
     return false;    
   } else { //Ligado
     Serial.println(F("Ar-condicionado ligado..."));
+    Serial.print(F("Medição: "));
+    Serial.println(ldrAr);
     return true;
   }
 }
@@ -54,9 +58,13 @@ bool projetorEstaLigado() {
   
   if (ldrPr >= 150) { //Desligado
     Serial.println(F("Projetor desligado..."));
+    Serial.print(F("Medição: "));
+    Serial.println(ldrPr);
     return false;
   } else {
     Serial.println(F("Projetor ligado..."));
+    Serial.print(F("Medição: "));
+    Serial.println(ldrPr);
     return true;
   }
 }
