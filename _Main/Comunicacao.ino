@@ -20,7 +20,8 @@ void ficarOnline() {
 
 void conectarServidor() {
   Serial.println(F("Conectando..."));
-  if (!client.connect(hostname, nameSpace)) {
+  //if (!client.connect(hostname, nameSpace)) {
+  if (!client.connect(hostname, nameSpace, port)) {
     Serial.println(F("ERRO: Conexão Servidor!"));
     erroFatal();
   } else {

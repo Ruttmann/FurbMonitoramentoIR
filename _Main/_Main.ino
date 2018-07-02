@@ -38,10 +38,11 @@
  */
 SocketIOClient client; //Instância do cliente websocket
 const byte mac[] = { 0xAA, 0x00, 0xBE, 0xEF, 0xFE, 0xEE }; //MAC Address do Ethernet Shield
-const char hostname[] = "pdge4-furb.herokuapp.com"; //Hostname do servidor
+//const char hostname[] = "pdge4-furb.herokuapp.com"; //Hostname do servidor
+const char hostname[] = "192.168.1.7"; //Hostname do servidor
 const int port = 3000; //Porta para conexão ao servidor (Não obrigatório)
 const char nameSpace[] = "arduino"; //Namespace no servidor websocket
-const char identificador[] = "S555"; //Identificador do dispositivo
+const char identificador[] = "S666"; //Identificador do dispositivo
 extern String RID; //Guarda o Id das mensagens recebidas do servidor
 extern String Rname; //Guarda o SubId das mensagens recebidas do servidor
 extern String Rcontent; //Guarda o conteúdo das mensagens recebidas do servidor
@@ -112,12 +113,12 @@ void boot() {
     btnCad2 = digitalRead(PIN_CAD2);
     btnIniciar = digitalRead(PIN_INICIAR);
 
-    if (btnCad1) { //Cadastrar sinal 1
-      Serial.println(F("Cadastrar sinal 1"));
+    if (btnCad1) { //Cadastrar sinal ar-condicionado
+      Serial.println(F("Cadastrar sinal ar-condicionado"));
       setupIR();
       loopIR(true);
-    } else if (btnCad2) { //Cadastrar sinal 2
-      Serial.println(F("Cadastrar sinal 2"));
+    } else if (btnCad2) { //Cadastrar sinal projetor
+      Serial.println(F("Cadastrar sinal projetor"));
       setupIR();
       loopIR(false);
     }

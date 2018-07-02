@@ -33,6 +33,7 @@ void monitoraSalaVazia() {
     Serial.println(F("Reconectando dispositivo ao servidor..."));
     setupComunicacao();
     salaVazia = false;
+    enviarMensagem("endBoot", "msg", "restart");
     Serial.println(F("Retomando monitoramento..."));
   }
 }
@@ -97,6 +98,6 @@ void desligaDispositivos() {
   }
 
   if (projetorEstaLigado()) {
-    enviarMensagem("failure", "id", "pj");
+    enviarMensagem("failure", "id", "projetor");
   }
 }
