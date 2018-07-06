@@ -38,11 +38,11 @@
  */
 SocketIOClient client; //Instância do cliente websocket
 const byte mac[] = { 0xAA, 0x00, 0xBE, 0xEF, 0xFE, 0xEE }; //MAC Address do Ethernet Shield
-//const char hostname[] = "pdge4-furb.herokuapp.com"; //Hostname do servidor
-const char hostname[] = "192.168.1.7"; //Hostname do servidor
+const char hostname[] = "pdge4-furb.herokuapp.com"; //Hostname do servidor
+//const char hostname[] = "192.168.0.15"; //Hostname do servidor
 const int port = 3000; //Porta para conexão ao servidor (Não obrigatório)
 const char nameSpace[] = "arduino"; //Namespace no servidor websocket
-const char identificador[] = "S666"; //Identificador do dispositivo
+const char identificador[] = "S111"; //Identificador do dispositivo
 extern String RID; //Guarda o Id das mensagens recebidas do servidor
 extern String Rname; //Guarda o SubId das mensagens recebidas do servidor
 extern String Rcontent; //Guarda o conteúdo das mensagens recebidas do servidor
